@@ -1,4 +1,7 @@
 import csv
+from datetime import datetime
+import unicodedata
+import logging
 
 
 # Transforma un fichero csv en una lista
