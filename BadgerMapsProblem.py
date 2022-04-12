@@ -97,6 +97,61 @@ for i in range(len(names)):
     else:
         print(names[i])
 
+# Crear un registro logging para registrar las excepciones de filas vacías
+
+Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+logging.basicConfig(filename = "logfile_exceptions.log",
+                    filemode = "w",
+                    format = Log_Format)
+logger = logging.getLogger()
+
+        
+# Se imprimen los datos solicitados
+
+        
+print("\nLISTA DE LOS CLIENTES:")
+
+# Con aux_first y aux_last se obtiene el cliente que corresponde a los valores temporales
+last_check = datetime.strptime(csv_list[0][header['Last Check-In Date']],"%d/%m/%Y").timestamp()
+aux_last = 0
+first_check = datetime.strptime(csv_list[0][header['Last Check-In Date']],"%d/%m/%Y").timestamp()
+aux_first = 0
+
+for i in range(len(costumer_data)):
+    print("\nCliente " + str(i+1) + "\n")
+    # Excepción si una fila contiene menos campos de los esperados del csv completo
+    if len(header) > len(csv_list[i]):
+        try: 1/0
+        except:
+            print("No se poseen todos los datos de este cliente")
+     
+    # Comparar marca temporal con el cliente anterior y actualizar si es necesario
+    if csv_list[i][header['Last Check-In Date']] != '':
+        if last_check < datetime.strptime(csv_list[i][header['Last Check-In Date']],"%d/%m/%Y").timestamp():
+            last_check = datetime.strptime(csv_list[i][header['Last Check-In Date']],"%d/%m/%Y").timestamp()
+            aux_last = i
+        if first_check > datetime.strptime(csv_list[i][header['Last Check-In Date']],"%d/%m/%Y").timestamp():
+            first_check = datetime.strptime(csv_list[i][header['Last Check-In Date']],"%d/%m/%Y").timestamp()
+            aux_first = i
+    
+    aux_sum = 0    
+    for j in range(len(costumer_data[i])):
+        if len(costumer_data[i][j]) == 0:
+            # Excepción si un field está vacío
+            print(required_fields[j] + ": ", end="")
+            empty_field(costumer_data[i],j)
+        else:   
+            print(required_fields[j] + ": " + costumer_data[i][j])
+        
+        # Salta una excepción cuando el numero de campos del csv es menor de lo requerido
+        aux_sum = aux_sum + len(costumer_data[i][j])
+        if aux_sum == 0 and j == len(required_fields)-1:
+            logging.exception("All fields are empties in this row")
+
+
+print("\nEl cliente que ingresó por última vez fue " + names[aux_last])
+print("\nEl cliente que ingresó por primera vez fue " + names[aux_first] + "\n")
+
 
 
 
